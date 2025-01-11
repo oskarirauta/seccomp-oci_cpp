@@ -56,3 +56,22 @@ Syscalls might vary depending on your kernel and it's headers - therefore
 Make system uses these automaticly to parse supported syscalls from
 your linux headers. Scripts are based on existing scripts by other people
 with BSD style licenses.
+
+### <sub>Note</sub>
+Partly I did this for study purposes, seccomp is well documented, but
+on many cases documentation provides only minimal set of functionality
+to get you started. Also other software available felt pretty complex
+to me, mostly because it was written in C, which lacks containers
+such as maps, sets and vectors that can greatly simplify your project.
+Because I wrote it in C++, I was able to divide code to smaller
+sections and keep it pretty simple; hoping that anyone else wanting
+to study on how to utilize seccomp in their software, this would
+give another good starting point.
+
+### <sub>Library</sub>
+By default, build process also produces both shared and static libraries
+and links example program against static library. To link against dynamic
+library, pass SHARED_LINKING=yes environment variable for make. This though
+means that you need to manually install libseccomp-oci.a to /usr/lib to be
+able to execute program. My build system does not come with any automated
+install system.
