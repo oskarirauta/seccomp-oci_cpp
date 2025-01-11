@@ -1,0 +1,44 @@
+{
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "flags": [
+    "SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV",
+    "SECCOMP_FILTER_FLAG_TSYNC"
+  ],
+  "architectures": [
+    "SCMP_ARCH_X86_64"
+  ],
+  "syscalls": [
+    {
+      "names": [
+        "rmdir",
+        "mkdir"
+      ],
+      "action": "SCMP_ACT_KILL"
+    },
+    {
+      "names": [
+        "uname",
+        "chdir"
+      ],
+      "action": "SCMP_ACT_ERRNO"
+    },
+    {
+      "names": [
+        "personality"
+      ],
+      "args": [
+        {
+          "index": 0,
+          "value": 131080,
+          "op": "SCMP_CMP_EQ",
+        },
+        {
+          "index": 0,
+          "value": 131072,
+          "op": "SCMP_CMP_EQ"
+        }
+      ],
+      "action": "SCMP_ACT_ERRNO"
+    }
+  ]
+}
