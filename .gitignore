@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+include/seccomp/types/syscall_names.inc
+src/syscall_types.inc
+objs/*.o
+example
+pfail1
+pfail2
+psucceed
