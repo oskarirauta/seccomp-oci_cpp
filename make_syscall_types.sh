@@ -16,54 +16,5 @@ CC=$1
 echo "#include <asm/unistd.h>"
 echo "static const std::map<SECCOMP::SYSCALL::TYPE, SECCOMP::SYSCALL::MEMBER> syscalls = {"
 echo "#include <sys/syscall.h>" | ${CC} -E -dM - | grep '^#define __NR_[a-z0-9_]\+[ \t].*[0-9].*$' | \
-	#LC_ALL=C sed -r -n -e 's/^\#define[ \t]+__NR_([a-z0-9_]+)[ \t]+([ ()+0-9a-zNR_LSYCABE]+)(.*)/ [\2] = "\1",/p'
 	LC_ALL=C sed -r -n -e 's/^\#define[ \t]+__NR_([a-z0-9_]+)[ \t]+([ ()+0-9a-zNR_LSYCABE]+)(.*)/ { SECCOMP::SYSCALL::TYPE::\U\1\L, { .name = "\U__NR_\L\1", .ociname = "\L\1", .value = \U__NR_\L\1 }},/p'
 echo "};"
-
-exit 0
-
-extra_syscalls="$(echo "#include <sys/syscall.h>" | ${CC} -E -dM - | sed -r -n -e 's/^#define __ARM_NR_([a-z0-9_]+)/\1/p')"
-
-cat <<EOF
-static inline const char *syscall_name(unsigned i) {
-  if (i < ARRAY_SIZE(__syscall_names))
-    return __syscall_names[i];
-  switch (i) {
-EOF
-echo "$extra_syscalls" | \
-    LC_ALL=C sed -r -n -e 's/^([a-z0-9_]+)[ \t]+([ ()+0-9a-zNR_LAMBSE]+)(.*)/    case \2: return "\1";/p'
-cat <<EOF
-  default: return (void*)0;
-  }
-}
-EOF
-
-cat <<EOF
-static inline int syscall_index(unsigned i) {
-  if (i < ARRAY_SIZE(__syscall_names))
-    return i;
-  switch (i) {
-EOF
-echo "$extra_syscalls" | \
-    LC_ALL=C perl -ne 'print "  case $2: return ARRAY_SIZE(__syscall_names) + ", $. - 1, ";\n" if /^([a-z0-9_]+)[ \t]+([ ()+0-9a-zNR_LAMBSE]+)(.*)/;'
-cat <<EOF
-  default: return -1;
-  }
-}
-EOF
-
-cat <<EOF
-static inline int syscall_index_to_number(unsigned i) {
-  if (i < ARRAY_SIZE(__syscall_names))
-    return i;
-  switch (i) {
-EOF
-echo "$extra_syscalls" | \
-    LC_ALL=C perl -ne 'print "  case ARRAY_SIZE(__syscall_names) + ", $. - 1, ": return $2;\n" if /^([a-z0-9_]+)[ \t]+([ ()+0-9a-zNR_LAMBSE]+)(.*)/;'
-cat <<EOF
-  default: return -1;
-  }
-}
-EOF
-
-echo "#define SYSCALL_COUNT (ARRAY_SIZE(__syscall_names) + $({ test -n "$extra_syscalls" && echo "$extra_syscalls"; } | wc -l))"
